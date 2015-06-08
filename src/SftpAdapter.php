@@ -2,7 +2,7 @@
 
 namespace League\Flysystem\Sftp;
 
-//use Crypt_RSA;
+use Crypt_RSA;
 use InvalidArgumentException;
 use League\Flysystem\Adapter\AbstractFtpAdapter;
 use League\Flysystem\Adapter\Polyfill\StreamedCopyTrait;
@@ -170,7 +170,7 @@ class SftpAdapter extends AbstractFtpAdapter
             $this->privatekey = file_get_contents($this->privatekey);
         }
 
-        $key = new \PHPSecLib\Crypt_RSA();
+        $key = new Crypt_RSA();
 
         if ($this->password) {
             $key->setPassword($this->password);
