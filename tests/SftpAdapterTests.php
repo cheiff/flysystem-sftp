@@ -3,6 +3,7 @@
 use League\Flysystem\Filesystem;
 use League\Flysystem\FilesystemInterface;
 use League\Flysystem\Sftp\SftpAdapter as Sftp;
+use League\Flysystem\Sftp\SftpAdapter;
 
 class SftpTests extends PHPUnit_Framework_TestCase
 {
@@ -18,6 +19,7 @@ class SftpTests extends PHPUnit_Framework_TestCase
         $adapter = new Sftp(['username' => 'test', 'password' => 'test']);
         $mock = Mockery::mock('Net_SFTP');
         $mock->shouldReceive('__toString')->andReturn('Net_SFTP');
+        $mock->shouldReceive('isConnected')->andReturn(true);
         $mock->shouldReceive('disconnect');
         $adapter->setNetSftpConnection($mock);
         $filesystem = new Filesystem($adapter);
@@ -393,6 +395,36 @@ class SftpTests extends PHPUnit_Framework_TestCase
         $adapter->setNetSftpConnection($mock);
         $mock->shouldReceive('login')->with('test', 'test')->andReturn(false);
         $adapter->connect();
+    }
+
+    /**
+     * @dataProvider  adapterProvider
+     *
+     * @param             $filesystem
+     * @param SftpAdapter $adapter
+     * @param             $mock
+     */
+    public function testIsConnected($filesystem, SftpAdapter $adapter, $mock)
+    {
+        $adapter->setNetSftpConnection($mock);
+        $mock->shouldReceive('isConnected')->andReturn(true);
+        $this->assertTrue($adapter->isConnected());
+    }
+
+    /**
+     * @dataProvider  adapterProvider
+     *
+     * @param             $filesystem
+     * @param SftpAdapter $adapter
+     */
+    public function testIsNotConnected($filesystem, SftpAdapter $adapter)
+    {
+        $mock = Mockery::mock('Net_SFTP');
+        $mock->shouldReceive('__toString')->andReturn('Net_SFTP');
+        $mock->shouldReceive('disconnect');
+        $mock->shouldReceive('isConnected')->andReturn(false);
+        $adapter->setNetSftpConnection($mock);
+        $this->assertFalse($adapter->isConnected());
     }
 
     /**
